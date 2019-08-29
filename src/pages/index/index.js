@@ -2,9 +2,25 @@ import Taro, { Component, Config, showLoading, hideLoading } from '@tarojs/taro'
 import { View, Text, Input, Checkbox, Radio, CheckboxGroup, Button, Image } from '@tarojs/components';
 import './index.scss';
 import icon_close from './icon_close.png'
+import { connect } from '@tarojs/redux';
+import { bindActionCreators } from 'redux'
+import * as Actions from '../../actions/index'
 
 const isWx = process.env.TARO_ENV == 'weapp';
 
+function mapStateToProps(state) {
+  return {
+    manageTodos: state.manageTodos.toJS()
+  }
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    ...bindActionCreators(Actions, dispatch)
+  }
+}
+
+@connect(mapStateToProps, mapDispatchToProps)
 export default class Index extends Component {
 
   config = {
