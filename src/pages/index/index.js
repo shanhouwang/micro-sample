@@ -182,19 +182,21 @@ export default class Index extends Component {
       <View className='index'>
         <Text className='index_top'>TODOS</Text>
         <Input
-          className='index_input'
           type='text'
+          className='index_input'
           value={this.state.inputContent}
           placeholder={'What needs to be done?'}
           autoFocus={true}
           onConfirm={this.save} />
         <View className='index_tip'>
-          <Checkbox checked={this.state.isAllChecked}
+          <Checkbox
+            className="index_tip_txt"
+            checked={this.state.isAllChecked}
             onClick={() => { this.clickAllCheckBox() }}>
             <Text onClick={() => { this.clickAllCheckBox() }}>Mark all as complete</Text>
           </Checkbox>
         </View>
-        <View className='index_list'>
+        <View className='index_list' style={{ display: this.state.value.length == 0 ? 'none' : 'flex' }} >
           {
             this.state.value.map((item, index) => {
               return (
@@ -231,7 +233,7 @@ export default class Index extends Component {
         </View>
         <View className='index_bottom'>
           <Button onClick={() => { this.clearTodos() }}>
-            Clear  {this.state.checkedCount}  completed item
+            清除{this.state.checkedCount}个完成选项
           </Button>
         </View>
       </View>
