@@ -3,32 +3,28 @@ import { View, Text, Input, Checkbox, Radio, CheckboxGroup, Button, Image } from
 import './index.scss';
 import icon_close from './icon_close.png'
 import { connect } from '@tarojs/redux';
-import { bindActionCreators } from 'redux'
-import * as Actions from '../../actions/index'
+
+import { add, deleteByIndex, asyncAdd } from '../../actions/index'
 
 const isWx = process.env.TARO_ENV == 'weapp';
 
-function mapStateToProps(state) {
-  return {
-    manageTodos: state.manageTodos.toJS()
+@connect(({ counter }) => ({
+  counter
+}), (dispatch) => ({
+  add(input) {
+    dispatch(add(input.detail.value))
+  },
+  deleteByIndex(index) {
+    dispatch(deleteByIndex(index))
   }
-}
-
-function mapDispatchToProps(dispatch) {
-  return {
-    ...bindActionCreators(Actions, dispatch)
-  }
-}
-
-@connect(mapStateToProps, mapDispatchToProps)
+}))
 export default class Index extends Component {
 
   config = {
     navigationBarTitleText: '首页'
   }
 
-  componentWillMount() {
-  }
+  componentWillMount() { }
 
   componentDidMount() {
     if (isWx) {
@@ -203,7 +199,7 @@ export default class Index extends Component {
           value={this.state.inputContent}
           placeholder={'What needs to be done?'}
           autoFocus={true}
-          onConfirm={this.save} />
+          onConfirm={this.props.add} />
         <View className='index_tip'>
           <Checkbox
             className="index_tip_txt"
@@ -241,7 +237,7 @@ export default class Index extends Component {
                     className='index_list_item_img_close'
                     style={{ display: isWx ? 'flex' : item.showClose ? 'flex' : 'none' }}
                     src={icon_close}
-                    onClick={() => { this.deleteTodosByIndex(index) }} />
+                    onClick={() => { this.props.deleteByIndex(index) }} />
                 </View>
               )
             })

@@ -1,18 +1,22 @@
 import { ADD, DELETE } from '../constants/constants'
 
-export default createReducer(fromJS({
+const INITIAL_STATE = {
     data: []
-}), {
-        [ADD]: (state) => {
-            const counterState = state.toJS()
-            return state.merge({
-                data: counterState.num + 1
-            })
-        },
-        [MINUS]: (state) => {
-            const counterState = state.toJS()
-            return state.merge({
-                num: counterState.num - 1
-            })
-        }
-    })
+}
+
+export default function manageTodos(state = INITIAL_STATE, action) {
+    switch (action.type) {
+        case ADD:
+            return {
+                ...state,
+                data: state.data.concat(action.text)
+            }
+        case DELETE:
+            return {
+                ...state,
+                data: state.data.splice(0, 1)
+            }
+        default:
+            return state;
+    }
+}

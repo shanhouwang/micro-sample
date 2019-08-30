@@ -1,14 +1,16 @@
 import { ADD, DELETE } from '../constants/constants'
 
-export const add = () => {
+export const add = (text) => {
     return {
-        type: ADD
+        type: ADD,
+        text
     }
 }
 
-export const deleteByIndex = () => {
+export const deleteByIndex = (index) => {
     return {
-        type: DELETE
+        type: DELETE,
+        index
     }
 }
 
