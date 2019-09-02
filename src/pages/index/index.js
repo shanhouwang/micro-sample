@@ -1,7 +1,7 @@
 import Taro, { Component, Config, showLoading, hideLoading } from '@tarojs/taro';
 import { View, Text, Input, Checkbox, Radio, CheckboxGroup, Button, Image } from '@tarojs/components';
 import './index.scss';
-import icon_close from './icon_close.png'
+import icon_close from './icon_close.png';
 
 const isWx = process.env.TARO_ENV == 'weapp';
 
@@ -11,8 +11,7 @@ export default class Index extends Component {
     navigationBarTitleText: '首页'
   }
 
-  componentWillMount() {
-  }
+  componentWillMount() {}
 
   componentDidMount() {
     if (isWx) {
@@ -53,7 +52,7 @@ export default class Index extends Component {
    * 保存数据内容
    */
   save = e => {
-    var info = new Object();
+    let info = new Object();
     info.txt = e.detail.value;
     info.checked = false;
     info.showClose = false;
