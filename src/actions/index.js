@@ -1,16 +1,42 @@
-import { ADD, DELETE } from '../constants/constants'
+import * as Actions from '../constants/constants'
 
 export const add = (text) => {
     return {
-        type: ADD,
+        type: Actions.ADD,
         text
     }
 }
 
 export const deleteByIndex = (index) => {
     return {
-        type: DELETE,
+        type: Actions.DELETE,
         index
+    }
+}
+
+export const onMouseOver = (index) => {
+    return {
+        type: Actions.ON_MOUSE_OVER,
+        index
+    }
+}
+
+export const clickTodosByIndex = (index) => {
+    return {
+        type: Actions.CLICK_TODOS_BY_INDEX,
+        index
+    }
+}
+
+export const clickAllCheckbox = () => {
+    return {
+        type: Actions.CLICK_ALL_CHECKBOX
+    }
+}
+
+export const clearTodos = () => {
+    return {
+        type: Actions.CLEAR_TODOS
     }
 }
 

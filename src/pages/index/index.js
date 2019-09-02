@@ -4,18 +4,34 @@ import './index.scss';
 import icon_close from './icon_close.png'
 import { connect } from '@tarojs/redux';
 
-import { add, deleteByIndex, asyncAdd } from '../../actions/index'
+import * as actions from '../../actions/index'
 
 const isWx = process.env.TARO_ENV == 'weapp';
 
-@connect(({ counter }) => ({
-  counter
-}), (dispatch) => ({
+const mapStateToProps = ({ manageTodos }) => ({
+  todos: manageTodos.todos,
+  isAllChecked: manageTodos.isAllChecked,
+  checkedCount: manageTodos.checkedCount
+})
+
+/**
+ * mapStateToProps 前者负责输入逻辑 即将state映射到 UI 组件的参数（props）
+ * 
+ * mapDispatchToProps 后者负责输出逻辑，即将用户对 UI 组件的操作映射成 Action
+ */
+@connect(mapStateToProps, (dispatch) => ({
   add(input) {
-    dispatch(add(input.detail.value))
-  },
-  deleteByIndex(index) {
-    dispatch(deleteByIndex(index))
+    dispatch(actions.add(input))
+  }, deleteByIndex(index) {
+    dispatch(actions.deleteByIndex(index))
+  }, onMouseOver(index) {
+    dispatch(actions.onMouseOver(index))
+  }, clickTodosByIndex(index) {
+    dispatch(actions.clickTodosByIndex(index))
+  }, sxxxxx() {
+    dispatch(actions.clickAllCheckbox())
+  }, clearTodos() {
+    dispatch(actions.clearTodos())
   }
 }))
 export default class Index extends Component {
@@ -26,170 +42,71 @@ export default class Index extends Component {
 
   componentWillMount() { }
 
-  componentDidMount() {
-    if (isWx) {
-      wx.getStorage({
-        key: 'value',
-        success: (res) => {
-          this.setState({
-            value: res.data
-          })
-          this.setCheckedCount(res.data)
-          this.setAllChecked(res.data)
-        }
-      })
-    } else {
-      let data = JSON.parse(localStorage.getItem('value'));
-      this.setState({
-        value: data
-      })
-      this.setCheckedCount(data)
-      this.setAllChecked(data)
-    }
-  }
+  /**
+   * shouldComponentUpdate 函数返回布尔值 默认为true，若为false，则后续的render函数不讲执行 使用得当能提高React性能
+   * 
+   * true React 接下来就会依次调用对应组件的 componentWillUpdate、render 和 componentDidUpdate 函数
+   */
+  // shouldComponentUpdate() { }
+
+  /**
+   * render 函数被调用完之后，并非立即调用，是render函数返回的内容已经渲染到DOM树上，此时才触发此函数
+   */
+  componentDidMount() { }
 
   componentWillUnmount() { }
+
+  /**
+   * 在 render 函数里面被谊染的子组件就会经历更新过程，不管父组件传给子组件的 props 有没有改变，都会触发子组件的 componentWillReceiveProps 函数
+   */
+  componentWillReceiveProps() { }
 
   componentDidShow() { }
 
   componentDidHide() { }
 
   state = {
-    value: [],
     inputContent: '',
-    isAllChecked: false,
-    checkedCount: 0
   }
 
-  /**
-   * 保存数据内容
-   */
-  save = e => {
-    var info = new Object();
-    info.txt = e.detail.value;
-    info.checked = false;
-    info.showClose = false;
-    let d = this.state.value.concat(info)
-    this.saveDataToLocal(d)
+  saveNewTodo(e) {
+    let { add } = this.props
+    if (!e.detail.value) return;
+    add(e.detail.value)
     this.setState({
-      value: d,
-      inputContent: '',
-      isAllChecked: false
-    })
-  }
-
-  /**
-   * 保存数据到浏览器/手机内存
-   */
-  saveDataToLocal = (saveData) => {
-    if (isWx) {
-      wx.setStorage({
-        key: 'value',
-        data: saveData,
-        success: (res) => {
-          console.log('保存成功')
-        }
-      })
-    } else {
-      localStorage.setItem('value', JSON.stringify(saveData))
-    }
-  }
-
-  /**
-   * 勾选选项
-   */
-  doneTodos = (ind) => {
-    let data = this.state.value;
-    for (let i = 0; i < data.length; i++) {
-      if (i == ind) {
-        data[i].checked = !data[i].checked
-      }
-    }
-    this.setCheckedCount(data)
-    this.setAllChecked(data)
-    this.saveDataToLocal(data)
-    this.setState({
-      value: data
-    })
-  }
-
-  /**
-   * 设置是否全选
-   */
-  setAllChecked = (data) => {
-    let allChecked = data.every((everyItem) => {
-      return everyItem.checked
-    })
-    this.setState({
-      isAllChecked: data.length == 0 ? false : allChecked
-    })
-  }
-
-  /**
-   * 底部选择数量更新
-   */
-  setCheckedCount = (data) => {
-    let count = 0
-    for (let i = 0; i < data.length; i++) {
-      if (data[i].checked) {
-        count++
-      }
-    }
-    this.setState({
-      checkedCount: count
-    })
-  }
-
-  /**
-   * 点击了全部选中按钮的时候
-   */
-  clickAllCheckBox = () => {
-    let checked = !this.state.isAllChecked
-    let data = this.state.value;
-    for (let i = 0; i < data.length; i++) {
-      data[i].checked = checked
-    }
-    this.saveDataToLocal(data)
-    this.setState({
-      value: data,
-      isAllChecked: checked,
-      checkedCount: checked ? data.length : 0
-    })
-  }
-
-  /**
-   * 清除选中选项
-   */
-  clearTodos = () => {
-    let data = [];
-    for (let i = 0; i < this.state.value.length; i++) {
-      if (!this.state.value[i].checked) {
-        data.push(this.state.value[i])
-      }
-    }
-    this.saveDataToLocal(data)
-    this.setState({
-      value: data,
-      isAllChecked: false,
-      checkedCount: 0
-    })
-  }
-
-  /**
-   * 根据index删除选项
-   */
-  deleteTodosByIndex = (index) => {
-    let data = this.state.value;
-    data.splice(index, 1)
-    this.saveDataToLocal(data)
-    this.setState({
-      value: data
-    })
-    this.setAllChecked(data)
-    this.setCheckedCount(data)
+      inputContent: ''
+    });
   }
 
   render() {
+
+    let {
+      todos
+      , isAllChecked
+      , checkedCount
+      , deleteByIndex
+      , onMouseOver
+      , clickTodosByIndex
+      , clearTodos
+      , sxxxxx } = this.props
+
+    const todosJsx = todos.map((item, index) => {
+      return (<View className='index_list_item' onMouseOver={onMouseOver.bind(this, index)}>
+        <Checkbox
+          checked={item.checked}
+          onClick={clickTodosByIndex.bind(this, index)} />
+        <Text
+          className={item.checked ? 'index_list_item_txt_line' : 'index_list_item_txt'}
+          onClick={clickTodosByIndex.bind(this, index)}>{item.txt}</Text>
+        <Image
+          className='index_list_item_img_close'
+          style={{ display: isWx ? 'flex' : item.showClose ? 'flex' : 'none' }}
+          src={icon_close}
+          onClick={deleteByIndex.bind(this, index)} />
+      </View>
+      )
+    });
+
     return (
       <View className='index'>
         <Text className='index_top'>TODOS</Text>
@@ -199,53 +116,20 @@ export default class Index extends Component {
           value={this.state.inputContent}
           placeholder={'What needs to be done?'}
           autoFocus={true}
-          onConfirm={this.props.add} />
+          onConfirm={this.saveNewTodo.bind(this)} />
         <View className='index_tip'>
           <Checkbox
-            className="index_tip_txt"
-            checked={this.state.isAllChecked}
-            onClick={() => { this.clickAllCheckBox() }}>
-            <Text onClick={() => { this.clickAllCheckBox() }}>Mark all as complete</Text>
+            checked={isAllChecked}
+            onClick={sxxxxx}>
+            <Text onClick={sxxxxx}>Mark all as complete</Text>
           </Checkbox>
         </View>
-        <View className='index_list' style={{ display: this.state.value.length == 0 ? 'none' : 'flex' }} >
-          {
-            this.state.value.map((item, index) => {
-              return (
-                <View
-                  className='index_list_item'
-                  onMouseOver={() => {
-                    let data = this.state.value;
-                    for (let i = 0; i < data.length; i++) {
-                      if (i == index) {
-                        data[i].showClose = true
-                      } else {
-                        data[i].showClose = false
-                      }
-                    }
-                    this.setState({
-                      value: data
-                    })
-                  }}>
-                  <Checkbox
-                    checked={item.checked}
-                    onClick={() => { this.doneTodos(index) }} />
-                  <Text
-                    className={item.checked ? 'index_list_item_txt_line' : 'index_list_item_txt'}
-                    onClick={() => { this.doneTodos(index) }}>{item.txt}</Text>
-                  <Image
-                    className='index_list_item_img_close'
-                    style={{ display: isWx ? 'flex' : item.showClose ? 'flex' : 'none' }}
-                    src={icon_close}
-                    onClick={() => { this.props.deleteByIndex(index) }} />
-                </View>
-              )
-            })
-          }
+        <View className='index_list' style={{ display: todos.length == 0 ? 'none' : 'flex' }} >
+          {todosJsx}
         </View>
         <View className='index_bottom'>
-          <Button onClick={() => { this.clearTodos() }}>
-            清除{this.state.checkedCount}个完成选项
+          <Button onClick={clearTodos}>
+            清除（{checkedCount}）个完成选项
           </Button>
         </View>
       </View>

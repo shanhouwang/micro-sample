@@ -3,11 +3,8 @@ import thunkMiddleware from 'redux-thunk'
 import { createLogger } from 'redux-logger'
 import rootReducer from '../reducers'
 
-const middlewares = [
-    thunkMiddleware,
-    createLogger()
-  ]
+const middlewares = [thunkMiddleware, createLogger()]
 
 export default function configStore() {
-    return createStore(rootReducer, applyMiddleware(...middlewares))
+  return createStore(rootReducer, applyMiddleware(...middlewares))
 }
