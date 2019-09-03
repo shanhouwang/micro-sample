@@ -12,14 +12,13 @@ const INITIAL_STATE = {
     checkedCount: setCheckedCount(local)
 }
 
-console.log(INITIAL_STATE)
-
 const isWx = process.env.TARO_ENV == 'weapp';
 
 function getTodosFromLocal() {
     let data = [];
     if (isWx) {
         let wxData = wx.getStorageSync('todos');
+        console.log(wxData)
         data = wxData == null || wxData == undefined ? [] : wxData;
     } else {
         let dataNotWx = localStorage.getItem('todos');
@@ -32,6 +31,9 @@ function getTodosFromLocal() {
  * 设置是否全选
  */
 function setAllChecked(data) {
+    if (data === null || data === undefined) {
+        return false
+    }
     let allChecked = data.every((everyItem) => {
         return everyItem == null ? false : everyItem.checked
     })
@@ -42,13 +44,7 @@ function setAllChecked(data) {
  * 底部选择数量更新
  */
 function setCheckedCount(data) {
-    let count = 0
-    for (let i = 0; i < data.length; i++) {
-        if (data[i].checked) {
-            count++
-        }
-    }
-    return count;
+    return data.filter((item) => { return item.checked }).length;
 }
 
 /**
@@ -83,15 +79,17 @@ function manageTodos(state = INITIAL_STATE, action) {
                 todos: todos,
                 isAllChecked: false
             }
-        case Actions.DELETE:
-            let todosOfDelete = state.todos;
-            todosOfDelete.splice(action.index, 1);
-            saveDataToLocal(todosOfDelete);
+        case Actions.DELETE_BY_INDEX:
+            // splice 并不会引发重新render
+            state.todos.splice(action.index, 1);
+            let dataByDelete = [...state.todos];
+            saveDataToLocal(dataByDelete);
+            console.log(dataByDelete)
             return {
                 ...state,
-                todos: todosOfDelete,
-                isAllChecked: setAllChecked(todosOfDelete),
-                checkedCount: setCheckedCount(todosOfDelete)
+                todos: dataByDelete,
+                isAllChecked: setAllChecked(dataByDelete),
+                checkedCount: setCheckedCount(dataByDelete)
             }
         case Actions.ON_MOUSE_OVER:
             let todosOfMouseOver = [];
@@ -124,7 +122,7 @@ function manageTodos(state = INITIAL_STATE, action) {
             }
         case Actions.CLICK_ALL_CHECKBOX:
             let checked = !state.isAllChecked
-            let dataOfAll = state.todos;
+            let dataOfAll = [...state.todos];
             for (let i = 0; i < dataOfAll.length; i++) {
                 dataOfAll[i].checked = checked
             }

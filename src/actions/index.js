@@ -9,7 +9,7 @@ export const add = (text) => {
 
 export const deleteByIndex = (index) => {
     return {
-        type: Actions.DELETE,
+        type: Actions.DELETE_BY_INDEX,
         index
     }
 }

@@ -31,10 +31,10 @@ page {
     display: flex;
     flex-direction: row;
     padding-left: 15px;
-    &_txt {
-      margin-right: 10px;
-      width: auto;
-      margin-bottom: 10px;
+    .taro-checkbox_checked  {
+      vertical-align: middle;
+      top:0;
+      background: red;
     }
   }
   &_list {

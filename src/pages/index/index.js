@@ -28,7 +28,7 @@ const mapStateToProps = ({ manageTodos }) => ({
     dispatch(actions.onMouseOver(index))
   }, clickTodosByIndex(index) {
     dispatch(actions.clickTodosByIndex(index))
-  }, sxxxxx() {
+  }, clickAllCheckbox() {
     dispatch(actions.clickAllCheckbox())
   }, clearTodos() {
     dispatch(actions.clearTodos())
@@ -38,6 +38,10 @@ export default class Index extends Component {
 
   config = {
     navigationBarTitleText: '首页'
+  }
+
+  state = {
+    inputContent: ''
   }
 
   componentWillMount() { }
@@ -65,10 +69,6 @@ export default class Index extends Component {
 
   componentDidHide() { }
 
-  state = {
-    inputContent: '',
-  }
-
   saveNewTodo(e) {
     let { add } = this.props
     if (!e.detail.value) return;
@@ -78,8 +78,13 @@ export default class Index extends Component {
     });
   }
 
-  render() {
+  onInputChange = (e) => {
+    this.setState({
+      inputContent: e.detail.value
+    });
+  }
 
+  render() {
     let {
       todos
       , isAllChecked
@@ -88,21 +93,23 @@ export default class Index extends Component {
       , onMouseOver
       , clickTodosByIndex
       , clearTodos
-      , sxxxxx } = this.props
+      , clickAllCheckbox } = this.props
+
+    console.log('todos')
 
     const todosJsx = todos.map((item, index) => {
-      return (<View className='index_list_item' onMouseOver={onMouseOver.bind(this, index)}>
+      return (<View className='index_list_item' onMouseOver={() => { onMouseOver(index) }}>
         <Checkbox
           checked={item.checked}
-          onClick={clickTodosByIndex.bind(this, index)} />
+          onClick={() => { clickTodosByIndex(index) }} />
         <Text
           className={item.checked ? 'index_list_item_txt_line' : 'index_list_item_txt'}
-          onClick={clickTodosByIndex.bind(this, index)}>{item.txt}</Text>
+          onClick={() => { clickTodosByIndex(index) }}>{item.txt}</Text>
         <Image
           className='index_list_item_img_close'
           style={{ display: isWx ? 'flex' : item.showClose ? 'flex' : 'none' }}
           src={icon_close}
-          onClick={deleteByIndex.bind(this, index)} />
+          onClick={() => { deleteByIndex(index) }} />
       </View>
       )
     });
@@ -116,12 +123,13 @@ export default class Index extends Component {
           value={this.state.inputContent}
           placeholder={'What needs to be done?'}
           autoFocus={true}
+          onInput={this.onInputChange}
           onConfirm={this.saveNewTodo.bind(this)} />
         <View className='index_tip'>
           <Checkbox
             checked={isAllChecked}
-            onClick={sxxxxx}>
-            <Text onClick={sxxxxx}>Mark all as complete</Text>
+            onClick={clickAllCheckbox}>
+            <Text onClick={clickAllCheckbox}>Mark all as complete</Text>
           </Checkbox>
         </View>
         <View className='index_list' style={{ display: todos.length == 0 ? 'none' : 'flex' }} >
